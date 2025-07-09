@@ -1,0 +1,36 @@
+from ultralytics import YOLO
+import cv2
+import numpy as np
+
+class WeaponDetector:
+    def __init__(self):
+        self.model = YOLO('models/yolov9_weapons.pt')  # Custom-trained weights
+        self.classes = ['pistol', 'knife', 'rifle', 'explosive']
+        self.threshold = 0.85
+
+    def detect(self, frame):
+        results = self.model(frame)[0]
+        weapons = []
+        
+        for box in results.boxes:
+            if box.conf > self.threshold:
+                x1, y1, x2, y2 = map(int, box.xyxy[0])
+                weapon_type = self.classes[int(box.cls)]
+                weapons.append({
+                    'type': weapon_type,
+                    'confidence': float(box.conf),
+                    'bbox': [x1, y1, x2, y2]
+                })
+        
+        return weapons
+
+    def draw_detections(self, frame, weapons):
+        for weapon in weapons:
+            x1, y1, x2, y2 = weapon['bbox']
+            cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 255), 2)
+            cv2.putText(frame, 
+                       f"{weapon['type']} {weapon['confidence']:.2f}", 
+                       (x1, y1-10), 
+                       cv2.FONT_HERSHEY_SIMPLEX, 
+                       0.9, (0, 0, 255), 2)
+        return frame

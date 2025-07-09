@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Elite Surveillance</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        #videoFeed { border: 3px solid #333; }
+        .alert { color: red; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>Real-Time Surveillance Dashboard</h1>
+    <img id="videoFeed" src="{{ url_for('video_feed') }}" width="800">
+    <div id="alerts"></div>
+
+    <script>
+        const alertBox = document.getElementById('alerts');
+        const ws = new WebSocket(`ws://${window.location.hostname}:5000/alerts`);
+        
+        ws.onmessage = (event) => {
+            alertBox.innerHTML = `<p class="alert">${event.data}</p>`;
+        };
+    </script>
+</body>
+</html>
